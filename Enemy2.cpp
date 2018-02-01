@@ -11,6 +11,20 @@ Enemy2::Enemy2() {
 	
 	delayShoot  = 0;
 	shootTime = sf::seconds(3 + rand() % 8);
+	
+	isAlive = true;
+}
+
+void Enemy2::resetPosition(){
+	enemySprite.setPosition(1+rand()%640,rand() % 400 - 500);
+}
+
+void Enemy2::setLive(bool a){
+	isAlive = a;
+}
+
+bool Enemy2::getLive(){
+	return isAlive;
 }
 
 void Enemy2::update (float elapsed) {
