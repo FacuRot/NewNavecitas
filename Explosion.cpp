@@ -1,6 +1,6 @@
 #include "Explosion.h"
 
-Explosion::Explosion(float posX, float posY) {
+Explosion::Explosion() {
 	elapsedTime = 0;
 	rectX = 0;
 	rectY = 0;
@@ -9,17 +9,35 @@ Explosion::Explosion(float posX, float posY) {
 	explosionSprite.setTexture(explosionTexture);
 	
 	explosionSprite.setTextureRect(sf::IntRect(rectX, rectY, 250, 250));
-	explosionSprite.setPosition(posX, posY);
 	explosionSprite.setScale(0.6f, 0.6f);
+	
+	isAlive = false;
+	finished = false;
 }
 
 bool Explosion::isFinished(){
-	return timer.getElapsedTime().asSeconds() >= (16 * 0.035f);
+	return finished;
+}
+
+void Explosion::setPosition(float posX, float posY){
+	explosionSprite.setPosition(posX, posY);
+	
+	//cada vez que se posiciona la explocion es establece la variable como false
+	//para que se rinicie la explocion cada vez que se pocisiona
+	finished = false;
+}
+
+void Explosion::setLive(bool a){
+	isAlive = a;
+}
+
+bool Explosion::getLive(){
+	return isAlive;
 }
 
 void Explosion::update (float elapsed) {
 	elapsedTime += elapsed;
-	
+
 	if (elapsedTime > 0.035f){
 		elapsedTime = 0.0f;
 		
@@ -33,6 +51,8 @@ void Explosion::update (float elapsed) {
 		if (rectY >= 1000){
 			rectX = 0;
 			rectY = 0;
+			
+			finished = true;
 		}
 	}
 	
@@ -43,4 +63,3 @@ void Explosion::update (float elapsed) {
 void Explosion::draw (sf::RenderWindow & w) {
 	w.draw(explosionSprite);
 }
-
