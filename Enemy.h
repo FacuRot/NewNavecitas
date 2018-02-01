@@ -12,6 +12,8 @@ private:
 	sf::Texture enemyTexture;
 	sf::Sprite enemySprite;
 	
+	bool isAlive;
+	
 	float speed = 200.0f ;
 	
 	sf::Time shootTime;   
@@ -23,9 +25,11 @@ public:
 	sf::Vector2f getPosition();
 	sf::FloatRect getBounds();
 	void update (float elapsed);
+	void setLive(bool a);
+	bool getLive();
+	void resetPosition();
 	void draw (sf::RenderWindow & w);
 	void pause();
 };
 
 #endif
-
