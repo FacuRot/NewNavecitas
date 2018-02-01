@@ -12,12 +12,16 @@ private:
 	
 	float posX;
 	float posY;
+	bool isAlive;
 	
 	float speed = 500.0f;
 public:
-	Bullet(float x, float y);
+	Bullet();
+	void setPosition(float x, float y);
 	sf::Vector2f getPosition();
 	sf::FloatRect getBounds();
+	void setLive(bool a);
+	bool getLive();
 	void setRotation(float degree);
 	void setSpeed();
 	void update (float elapsed);
@@ -26,4 +30,3 @@ public:
 };
 
 #endif
-
