@@ -1,15 +1,28 @@
 #include "Missil.h"
 
-Missil::Missil(float x, float y) {
+Missil::Missil() {
 	missilTexture.loadFromFile("Resources/Textures/Misil2.png");
 	missilSprite.setTexture(missilTexture);
-	missilSprite.setPosition(x, y);
 	missilSprite.setRotation(-90);
 	missilSprite.setScale(0.15f, 0.15f);
+	
+	isAlive = false;
+}
+
+void Missil::setPosition(float x, float y){
+	missilSprite.setPosition(x, y);
 }
 
 void Missil::setDirectionX(float _movX){
 	movX = _movX;
+}
+
+void Missil::setLive(bool a){
+	isAlive = a;
+}
+
+bool Missil::getLive(){
+	return isAlive;
 }
 
 void Missil::update (float elapsed) {
