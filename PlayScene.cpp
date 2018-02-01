@@ -48,6 +48,33 @@ PlayScene::PlayScene() {
 		specialEnemies.push_back(*enemy2);
 	}
 	
+	//se crean 8 explosiones porque siempre son 5 enemigos comunes mas 3 especiales
+	for (int i=0; i<8; i++){
+		Explosion *explosion = new Explosion();
+		enemiesExplosions.push_back(explosion);
+	}
+	explosionIndex = 0;
+	
+	for (int i=0; i<100; i++){
+		Bullet *bullet = new Bullet();
+		bullets.push_back(bullet);
+	}
+	bulletIndex = 0;
+	
+	for (int i=0; i<100; i++){
+		Bullet *bullet = new Bullet();
+		playerBullets.push_back(bullet);
+	}
+	playerBulletIndex = 0;
+	
+	//se crean los misiles
+	Missil *newMisil1 = new Missil();
+	Missil *newMisil2 = new Missil();
+	Missil *newMisil3 = new Missil();
+	misils.push_back(newMisil1);
+	misils.push_back(newMisil2);
+	misils.push_back(newMisil3);
+	
 	timeToNextItem = sf::seconds(30);
 	delayItem = 0;
 }
@@ -55,29 +82,34 @@ PlayScene::PlayScene() {
 void PlayScene::processEvent(sf::RenderWindow &w, sf::Event &event){
 	if (event.type == sf::Event::KeyPressed){
 		if (event.key.code == sf::Keyboard::Space){
-			Bullet *bullet = new Bullet(player.getPosition().x + 22, player.getPosition().y);
-			bullet->setRotation(0);
-			bullet->setSpeed();
-			playerBullets.push_back(*bullet);
+			//Bullet *bullet = new Bullet(player.getPosition().x + 22, player.getPosition().y);
+			playerBullets[playerBulletIndex]->setPosition(player.getPosition().x + 22, player.getPosition().y);
+			playerBullets[playerBulletIndex]->setRotation(0);
+			playerBullets[playerBulletIndex]->setSpeed();
+			playerBullets[playerBulletIndex]->setLive(true);
+			playerBulletIndex++;
+			//playerBullets.push_back(bullet);
 			
 			playerGunFire.play();
 		}
 		if (event.key.code == sf::Keyboard::M && missilAmmo > 0){
-			Missil *newMisil1 = new Missil(player.getPosition().x + 15, player.getPosition().y + 30);
-			newMisil1->setDirectionX(-200.0f);
-			Missil *newMisil2 = new Missil(player.getPosition().x + 15, player.getPosition().y + 30);
-			newMisil2->setDirectionX(0);
-			Missil *newMisil3 = new Missil(player.getPosition().x + 15, player.getPosition().y + 30);
-			newMisil3->setDirectionX(200.0f);
-			misils.push_back(*newMisil1);
-			misils.push_back(*newMisil2);
-			misils.push_back(*newMisil3);
+			misils[0]->setPosition(player.getPosition().x + 15, player.getPosition().y + 30);
+			misils[0]->setDirectionX(-200.0f);
+			misils[0]->setLive(true);
+			
+			misils[1]->setPosition(player.getPosition().x + 15, player.getPosition().y + 30);
+			misils[1]->setDirectionX(0);
+			misils[1]->setLive(true);
+			
+			misils[2]->setPosition(player.getPosition().x + 15, player.getPosition().y + 30);
+			misils[2]->setDirectionX(200.0f);
+			misils[2]->setLive(true);
 			
 			missilAmmo--;
 			
 			launchMissil.play();
 		}
-		if ((event.key.code == sf::Keyboard::Space) && player.isDead()){
+		if ((event.key.code == sf::Keyboard::F) && player.isDead()){
 			Game::getInstance().switchScene(new MenuScene());
 		}
 	}
@@ -91,163 +123,197 @@ void PlayScene::update (float elapsed) {
 	player.update(elapsed);
 	
 	for (size_t i=0; i<enemies.size(); i++){
-		enemies[i].update(elapsed);
-		
-		if (enemies[i].fireEvent(elapsed)){
-			Bullet *bullet = new Bullet(enemies[i].getPosition().x-33, enemies[i].getPosition().y-34);
-			bullets.push_back(*bullet);
+		if (enemies[i].getLive()){
+			enemies[i].update(elapsed);
 			
-			enemyGunFire.play();
-		}
-		
-		if (enemies[i].getBounds().intersects(player.getBounds())){
-			player.getHit(30);
+			if (enemies[i].fireEvent(elapsed)){
+				bullets[bulletIndex]->setPosition(enemies[i].getPosition().x-33, enemies[i].getPosition().y-34);
+				bullets[bulletIndex]->setLive(true);
+				bulletIndex++;
+				
+				enemyGunFire.play();
+			}
 			
-			Explosion *newExplosion = new Explosion(enemies[i].getPosition().x-104, enemies[i].getPosition().y-98);
-			enemiesExplosions.push_back(*newExplosion);
-			explosionSound.play();
-			
-			enemies.erase(enemies.begin() + i);
+			if (enemies[i].getBounds().intersects(player.getBounds())){
+				player.getHit(30);
+				
+				enemiesExplosions[explosionIndex]->setPosition(enemies[i].getPosition().x-104, enemies[i].getPosition().y-98);
+				enemiesExplosions[explosionIndex]->setLive(true);
+				explosionIndex++;
+				explosionSound.play();
+				
+				enemies[i].setLive(false);
+				enemies[i].resetPosition();
+			}
 		}
 	}
 	
 	for (size_t i=0; i<specialEnemies.size(); i++){
-		specialEnemies[i].update(elapsed);
-		
-		if (specialEnemies[i].fireEvent(elapsed)){
-			Bullet *otherbullet = new Bullet(specialEnemies[i].getPosition().x-33, specialEnemies[i].getPosition().y-34);
-			bullets.push_back(*otherbullet);
+		if (specialEnemies[i].getLive()){
+			specialEnemies[i].update(elapsed);
 			
-			enemyGunFire.play();
-		}
-		
-		if (specialEnemies[i].getBounds().intersects(player.getBounds())){
-			player.getHit(30);
+			if (specialEnemies[i].fireEvent(elapsed)){
+				bullets[bulletIndex]->setPosition(specialEnemies[i].getPosition().x-33, specialEnemies[i].getPosition().y-34);
+				bullets[bulletIndex]->setLive(true);
+				bulletIndex++;
+				
+				enemyGunFire.play();
+			}
 			
-			Explosion *newExplosion = new Explosion(specialEnemies[i].getPosition().x-104, specialEnemies[i].getPosition().y-98);
-			enemiesExplosions.push_back(*newExplosion);
-			explosionSound.play();
-			
-			specialEnemies.erase(specialEnemies.begin() + i);
+			if (specialEnemies[i].getBounds().intersects(player.getBounds())){
+				player.getHit(30);
+				
+				enemiesExplosions[explosionIndex]->setPosition(specialEnemies[i].getPosition().x-104, specialEnemies[i].getPosition().y-98);
+				enemiesExplosions[explosionIndex]->setLive(true);
+				explosionIndex++;
+				explosionSound.play();
+				
+				
+				specialEnemies[i].setLive(false);
+				specialEnemies[i].resetPosition();
+			}
 		}
 	}
 	
 	//cuando el vector de enemigos especiales queda vacio se crean 3 mas y se aumenta su velocidad
-	if (specialEnemies.empty()){
-		for (int i=0; i<3; i++){
-			Enemy2* newEnemy = new Enemy2();
-			newEnemy->speedUp(addSpeed);
-			std::cout<<newEnemy->getSpeed()<<std::endl;
-			specialEnemies.push_back(*newEnemy);
+	if (specialEnemies[0].getLive() == false && specialEnemies[1].getLive() == false && 
+		specialEnemies[2].getLive() == false){
+		for (int i=0; i<specialEnemies.size(); i++){
+			specialEnemies[i].speedUp(addSpeed);
+			specialEnemies[i].setLive(true);
 		}
 		addSpeed += 10.0f;
 	}
 	
 	for (size_t i=0; i<bullets.size(); i++){
-		bullets[i].update(elapsed);
-		
-		if (bullets[i].getPosition().y >480+5){
-			bullets.erase(bullets.begin() + i);
-		}
-		
-		if (bullets[i].getBounds().intersects(player.getBounds())){
-			player.getHit(10);
-			bullets.erase(bullets.begin()+i);
+		if (bullets[i]->getLive()){
+			bullets[i]->update(elapsed);
+			
+			if (bullets[i]->getPosition().y >480+5){
+				bullets[i]->setLive(false);
+			}
+			
+			if (bullets[i]->getBounds().intersects(player.getBounds())){
+				player.getHit(10);
+				
+				bullets[i]->setLive(false);
+			}
 		}
 	}
 	
 	//si las balas se van de los limites de la pantalla son eliminadas del vector
 	for (size_t i=0; i<playerBullets.size(); i++){
-		playerBullets[i].update(elapsed);
-		
-		if (playerBullets[i].getPosition().y <= 0){
-			playerBullets.erase(playerBullets.begin()+i);
+		if (playerBullets[i]->getLive()){
+			playerBullets[i]->update(elapsed);
+			
+			if (playerBullets[i]->getPosition().y <= 0){
+				playerBullets[i]->setLive(false);
+			}
 		}
 	}
 	
 	
 	for (size_t j=0; j<playerBullets.size(); j++){
-		//se detectan las colisiones con los enemigos normales
-		for (size_t i=0; i<enemies.size(); i++){
-			if (enemies[i].getBounds().intersects(playerBullets[j].getBounds())){
-				Explosion *newExplosion = new Explosion(enemies[i].getPosition().x-104, enemies[i].getPosition().y-98);
-				enemiesExplosions.push_back(*newExplosion);
-				explosionSound.play();
-				
-				enemies.erase(enemies.begin() + i);
-				playerBullets.erase(playerBullets.begin() + j);
-				Enemy *enemy = new Enemy();
-				enemies.push_back(*enemy);
-				
-				score += 15;
+		if (playerBullets[j]->getLive()){
+			//se detectan las colisiones con los enemigos normales
+			for (size_t i=0; i<enemies.size(); i++){
+				if (enemies[i].getBounds().intersects(playerBullets[j]->getBounds())){
+					enemiesExplosions[explosionIndex]->setPosition(enemies[i].getPosition().x-104, enemies[i].getPosition().y-98);
+					enemiesExplosions[explosionIndex]->setLive(true);
+					explosionIndex++;
+					explosionSound.play();
+					
+					enemies[i].setLive(false);
+					enemies[i].resetPosition();
+					
+					playerBullets[j]->setLive(false);
+					
+					score += 15;
+				}
 			}
-		}
-		
-		//se detectan las colisiones con los enemigos especiales
-		for (size_t i=0; i<specialEnemies.size(); i++){
-			if (playerBullets[j].getBounds().intersects(specialEnemies[i].getBounds())){
-				Explosion *newExplosion = new Explosion(specialEnemies[i].getPosition().x-104, 
-														specialEnemies[i].getPosition().y-98);
-				enemiesExplosions.push_back(*newExplosion);
-				explosionSound.play();
-				
-				specialEnemies.erase(specialEnemies.begin() + i);
-				playerBullets.erase(playerBullets.begin() + j);
-				
-				score += 20;
+			
+			//se detectan las colisiones con los enemigos especiales
+			for (size_t i=0; i<specialEnemies.size(); i++){
+				if (playerBullets[j]->getBounds().intersects(specialEnemies[i].getBounds())){
+					enemiesExplosions[explosionIndex]->setPosition(specialEnemies[i].getPosition().x-104, 
+																   specialEnemies[i].getPosition().y-98);
+					enemiesExplosions[explosionIndex]->setLive(true);
+					explosionIndex++;
+					explosionSound.play();
+					
+					specialEnemies[i].setLive(false);
+					specialEnemies[i].resetPosition();
+					
+					playerBullets[j]->setLive(false);
+					
+					score += 20;
+				}
 			}
 		}
 	}
 	
 	for (size_t i=0; i<misils.size(); i++){
-		misils[i].update(elapsed);
-		
-		if ((misils[i].getPosition().x < 0) || (misils[i].getPosition().x > 640)){
-			misils.erase(misils.begin() + i);
-		}
-		if (misils[i].getPosition().y < 0){
-			misils.erase(misils.begin() + i);
+		if (misils[i]->getLive()){
+			misils[i]->update(elapsed);
+			
+			if ((misils[i]->getPosition().x < 0) || (misils[i]->getPosition().x > 640)){
+				misils[i]->setLive(false);
+			}
+			if (misils[i]->getPosition().y < 0){
+				misils[i]->setLive(false);
+			}
 		}
 	}
 	
 	for (int j=0; j<misils.size(); j++){
-		//se detectan las colisiones con los enemigos normales
-		for (size_t i=0; i<enemies.size(); i++){
-			if (misils[j].getBounds().intersects(enemies[i].getBounds())){
-				Explosion *newExplosion = new Explosion(enemies[i].getPosition().x-104, enemies[i].getPosition().y-98);
-				enemiesExplosions.push_back(*newExplosion);
-				explosionSound.play();
-				
-				enemies.erase(enemies.begin() + i);
-				misils.erase(misils.begin() + j);
-				Enemy *enemy = new Enemy();
-				enemies.push_back(*enemy);
-				
-				score += 15;
+		if (misils[j]->getLive()){
+			//se detectan las colisiones con los enemigos normales
+			for (size_t i=0; i<enemies.size(); i++){
+				if (misils[j]->getBounds().intersects(enemies[i].getBounds())){
+					enemiesExplosions[explosionIndex]->setPosition(enemies[i].getPosition().x-104, enemies[i].getPosition().y-98);
+					enemiesExplosions[explosionIndex]->setLive(true);
+					explosionIndex++;
+					explosionSound.play();
+					
+					enemies[i].setLive(false);
+					enemies[i].resetPosition();
+					
+					misils[j]->setLive(false);
+					
+					score += 15;
+				}
 			}
-		}
-		
-		//se detectan las colisiones con los enemigos especiales
-		for (size_t i=0; i<specialEnemies.size(); i++){
-			if (misils[j].getBounds().intersects(specialEnemies[i].getBounds())){
-				Explosion *newExplosion = new Explosion(specialEnemies[i].getPosition().x-104, 
-														specialEnemies[i].getPosition().y-98);
-				enemiesExplosions.push_back(*newExplosion);
-				explosionSound.play();
-				
-				specialEnemies.erase(specialEnemies.begin() + i);
-				misils.erase(misils.begin() + j);
-				
-				score += 20;
+			
+			//se detectan las colisiones con los enemigos especiales
+			for (size_t i=0; i<specialEnemies.size(); i++){
+				if (misils[j]->getBounds().intersects(specialEnemies[i].getBounds())){
+					enemiesExplosions[explosionIndex]->setPosition(specialEnemies[i].getPosition().x-104, 
+																   specialEnemies[i].getPosition().y-98);
+					enemiesExplosions[explosionIndex]->setLive(true);
+					explosionIndex++;
+					explosionSound.play();
+					
+					
+					//specialEnemies.erase(specialEnemies.begin() + i);
+					specialEnemies[i].setLive(false);
+					specialEnemies[i].resetPosition();
+					
+					//misils.erase(misils.begin() + j);
+					misils[j]->setLive(false);
+					
+					score += 20;
+				}
 			}
 		}
 	}
 	
 	
 	for (size_t i=0; i<enemiesExplosions.size(); i++){
-		enemiesExplosions[i].update(elapsed);
-		if (enemiesExplosions[i].isFinished()){
-			enemiesExplosions.erase(enemiesExplosions.begin()+i);
+		if (enemiesExplosions[i]->getLive() == true){
+			enemiesExplosions[i]->update(elapsed);
+			if (enemiesExplosions[i]->isFinished()){
+				enemiesExplosions[i]->setLive(false);
+			}
 		}
 	}
 	
@@ -314,6 +380,16 @@ void PlayScene::update (float elapsed) {
 			missilAmmo = 2;
 		}
 	}
+	
+	if (explosionIndex >= 7){
+		explosionIndex = 0;
+	}
+	if (bulletIndex >= 99){
+		bulletIndex = 0;
+	}
+	if (playerBulletIndex >= 99){
+		playerBulletIndex = 0;
+	}
 }
 
 void PlayScene::gamePause(){
@@ -326,13 +402,13 @@ void PlayScene::gamePause(){
 		specialEnemies[i].pause();
 	}
 	for (size_t i=0; i<bullets.size(); i++){
-		bullets[i].pause();
+		bullets[i]->pause();
 	}
 	for (size_t i=0; i<playerBullets.size(); i++){
-		playerBullets[i].pause();
+		playerBullets[i]->pause();
 	}
 	for (size_t i=0; i<misils.size(); i++){
-		misils[i].pause();
+		misils[i]->pause();
 	}
 	enemyGunFire.stop();
 	playerGunFire.stop();
@@ -344,22 +420,34 @@ void PlayScene::draw (sf::RenderWindow & w) {
 	BaseScene::draw(w);
 	background.draw(w);
 	for (size_t i=0; i<bullets.size(); i++){
-		bullets[i].draw(w);
+		if (bullets[i]->getLive()){
+			bullets[i]->draw(w);
+		}
 	}
 	for (size_t i=0; i<enemies.size(); i++){
-		enemies[i].draw(w);
+		if (enemies[i].getLive()){
+			enemies[i].draw(w);
+		}
 	}
 	for (size_t i=0; i<specialEnemies.size(); i++){
-		specialEnemies[i].draw(w);
+		if (specialEnemies[i].getLive()){
+			specialEnemies[i].draw(w);
+		}
 	}
 	for (size_t i=0; i<playerBullets.size(); i++){
-		playerBullets[i].draw(w);
+		if (playerBullets[i]->getLive()){
+			playerBullets[i]->draw(w);
+		}
 	}
 	for (size_t i=0; i<enemiesExplosions.size(); i++){
-		enemiesExplosions[i].draw(w);
+		if (enemiesExplosions[i]->getLive()){
+			enemiesExplosions[i]->draw(w);
+		}
 	}
 	for (size_t i=0; i<misils.size(); i++){
-		misils[i].draw(w);
+		if (misils[i]->getLive()){
+			misils[i]->draw(w);
+		}
 	}
 	item.draw(w);
 	player.draw(w);
@@ -367,4 +455,3 @@ void PlayScene::draw (sf::RenderWindow & w) {
 	w.draw(txtGameOver);
 	w.draw(txtNewRecord);
 }
-
