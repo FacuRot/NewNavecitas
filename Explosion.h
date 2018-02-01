@@ -13,14 +13,19 @@ private:
 	float elapsedTime;
 	sf::Clock timer;
 	
+	bool isAlive;
+	bool finished;
+	
 	float rectX;
 	float rectY;
 public:
-	Explosion(float posX, float posY);
+	Explosion();
+	void setPosition(float posX, float posY);
 	bool isFinished();
+	void setLive(bool a);
+	bool getLive();
 	void update (float elapsed);
 	void draw (sf::RenderWindow & w);
 };
 
 #endif
-
