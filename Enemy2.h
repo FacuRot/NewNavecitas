@@ -1,4 +1,3 @@
-#ifndef ENEMY2_H
 #define ENEMY2_H
 #include "Entity.hpp"
 #include <SFML/Graphics/Sprite.hpp>
@@ -12,6 +11,8 @@ private:
 	float speedX = 200.0f;
 	float speedY = 200.0f;
 	
+	bool isAlive;
+	
 	sf::Time shootTime;   
 	float delayShoot;
 public:
@@ -20,6 +21,9 @@ public:
 	void draw (sf::RenderWindow & w);
 	sf::Vector2f getPosition();
 	sf::FloatRect getBounds();
+	void resetPosition();
+	void setLive(bool a);
+	bool getLive();
 	void speedUp(float addSpeed);
 	void pause();
 	float getSpeed();
