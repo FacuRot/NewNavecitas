@@ -12,7 +12,6 @@
 #include "MenuScene.h"
 #include "ScrollingBackground.h"
 #include <SFML/System/Time.hpp>
-#include "specialShoot.h"
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -45,13 +44,23 @@ private:
 	
 	///entidades del juego
 	ScrollingBackground background;
+	
 	Player player;
+	
 	std::vector<Enemy> enemies;
 	std::vector<Enemy2> specialEnemies;
-	std::vector<Bullet> bullets;
-	std::vector<Bullet> playerBullets;
-	std::vector<Explosion> enemiesExplosions;
-	std::vector<Missil> misils;
+	
+	std::vector<Bullet*> bullets;
+	int bulletIndex;
+	
+	std::vector<Bullet*> playerBullets;
+	int playerBulletIndex;
+	
+	std::vector<Explosion*> enemiesExplosions;
+	int explosionIndex;
+	
+	std::vector<Missil*> misils;
+	
 	Item item;
 	
 	///variables auxiliares
@@ -67,6 +76,3 @@ public:
 	void processEvent(sf::RenderWindow &w, sf::Event &event);
 	void draw (sf::RenderWindow & w);
 };
-
-#endif
-
