@@ -11,13 +11,18 @@ private:
 	sf::Texture missilTexture;
 	sf::Sprite missilSprite;
 	
+	bool isAlive;
+	
 	float movX;
 	float speed = -200.0f;
 public:
-	Missil(float x, float y);
+	Missil();
+	void setPosition(float x, float y);
 	sf::FloatRect getBounds();
 	void update (float elapsed);
 	void setDirectionX(float _movX);
+	void setLive(bool a);
+	bool getLive();
 	sf::Vector2f getPosition();
 	sf::Sprite getSprite();
 	void pause();
@@ -25,4 +30,3 @@ public:
 };
 
 #endif
-
